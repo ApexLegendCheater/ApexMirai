@@ -44,27 +44,31 @@ fun aiMsg(group: String, msg: String): String = runBlocking {
     }
     val data = Gson().toJson(requestBody)
 
-    try {
-        val response: HttpResponse = client.post("$BASE_URL/chat/completions") {
-            contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $API_KEY")
-            setBody(data)
+    var retry = 0
+    do {
+        try {
+            val response: HttpResponse = client.post("$BASE_URL/chat/completions") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $API_KEY")
+                setBody(data)
+            }
+
+            val responseBody = response.bodyAsText()
+            println("Status Code: ${response.status.value}")
+            println("JSON Response: $responseBody")
+
+            // 解析 JSON 响应
+            // 使用 JsonPath 解析 JSON 响应
+            val messageContent = JsonPath.read<String>(responseBody, "$.choices[0].message.content")
+            println("Message Content: $messageContent")
+
+            return@runBlocking messageContent
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        } finally {
+            client.close()
         }
-
-        val responseBody = response.bodyAsText()
-        println("Status Code: ${response.status.value}")
-        println("JSON Response: $responseBody")
-
-        // 解析 JSON 响应
-        // 使用 JsonPath 解析 JSON 响应
-        val messageContent = JsonPath.read<String>(responseBody, "$.choices[0].message.content")
-        println("Message Content: $messageContent")
-
-        return@runBlocking messageContent
-    } catch (e: Exception) {
-        println("Error: ${e.message}")
-        return@runBlocking ""
-    } finally {
-        client.close()
-    }
+        retry++
+    } while (retry < 3)
+    return@runBlocking ""
 }

@@ -31,7 +31,9 @@ object WithConfiguration {
             val content = message[1]
             if (content is At && content.target == qq) {
                 val responseMsg = aiMsg(sender.id.toString(), message[2].content)
-                subject.sendMessage(message.quote() + responseMsg)
+                if (responseMsg.isNotEmpty()) {
+                    subject.sendMessage(message.quote() + responseMsg)
+                }
             }
         }
     }
