@@ -2,6 +2,8 @@ import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.FriendMessageEvent
+import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
@@ -21,7 +23,14 @@ object WithConfiguration {
         bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             if (sender.id == admin) {
-                val responseMsg = aiMsg(message.content)
+                val responseMsg = aiMsg(sender.id.toString(), message.content)
+                subject.sendMessage(message.quote() + responseMsg)
+            }
+        }
+        bot.eventChannel.subscribeAlways<GroupMessageEvent> {
+            val content = message[1]
+            if (content is At && content.target == qq) {
+                val responseMsg = aiMsg(sender.id.toString(), message[2].content)
                 subject.sendMessage(message.quote() + responseMsg)
             }
         }

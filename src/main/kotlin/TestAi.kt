@@ -9,19 +9,22 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 
-val historyMessages: JsonArray = JsonArray()
+val historyMessagesMap = mutableMapOf<String, JsonArray>()
 val MAX_HISTORY_LENGTH: Int = (System.getenv("MAX_HISTORY_LENGTH") ?: "50").toInt()
 val MAX_TOTAL_WORDS: Int = (System.getenv("MAX_TOTAL_WORDS") ?: "5000").toInt()
 val BASE_URL: String = System.getenv("API_URL") ?: "https://apikeyplus.com/v1"
 val API_KEY: String = System.getenv("API_KEY") ?: ""
 
-fun aiMsg(msg: String): String = runBlocking {
+fun aiMsg(group: String, msg: String): String = runBlocking {
     val client = HttpClient(CIO)
     // 构造新的消息
     val newMessage = JsonObject().apply {
         addProperty("role", "user")
         addProperty("content", msg)
     }
+
+    // 获取或初始化对应分组的历史消息
+    val historyMessages = historyMessagesMap.getOrPut(group) { JsonArray() }
 
     // 将新的消息添加到历史消息中
     historyMessages.add(newMessage)
