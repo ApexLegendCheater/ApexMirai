@@ -10,10 +10,11 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 
 val historyMessagesMap = mutableMapOf<String, JsonArray>()
-val MAX_HISTORY_LENGTH: Int = (System.getenv("MAX_HISTORY_LENGTH") ?: "50").toInt()
-val MAX_TOTAL_WORDS: Int = (System.getenv("MAX_TOTAL_WORDS") ?: "5000").toInt()
-val BASE_URL: String = System.getenv("API_URL") ?: "https://apikeyplus.com/v1"
-val API_KEY: String = System.getenv("API_KEY") ?: ""
+val MAX_HISTORY_LENGTH: Int =
+    (System.getenv("MAX_HISTORY_LENGTH") ?: System.getProperty("MAX_HISTORY_LENGTH") ?: "50").toInt()
+val MAX_TOTAL_WORDS: Int = (System.getenv("MAX_TOTAL_WORDS") ?: System.getProperty("MAX_TOTAL_WORDS") ?: "5000").toInt()
+val BASE_URL: String = System.getenv("API_URL") ?: System.getProperty("API_URL") ?: "https://apikeyplus.com/v1"
+val API_KEY: String = System.getenv("API_KEY") ?: System.getProperty("API_KEY") ?: ""
 
 fun aiMsg(group: String, msg: String): String = runBlocking {
     val client = HttpClient(CIO)
