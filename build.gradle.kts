@@ -20,7 +20,6 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:2.0.3")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.jayway.jsonpath:json-path:2.6.0")
-    implementation("com.jayway.jsonpath:json-path:2.6.0")
     implementation("org.ktorm:ktorm-core:4.0.0")
     runtimeOnly("mysql:mysql-connector-java:8.0.28")
 }
@@ -28,6 +27,20 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(mapOf("Main-Class" to "Main"))
+    }
+    from(configurations.runtimeClasspath.get().map {
+        if (it.isDirectory) it else zipTree(it)
+    })
+    val sourcesMain = sourceSets.main.get()
+    sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
+    from(sourcesMain.output)
+    exclude("META-INF/*.RSA", "META-INF/*.S", "META-INF/*.DSA")
+}
+
 kotlin {
     jvmToolchain(21)
 }

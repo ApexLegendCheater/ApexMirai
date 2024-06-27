@@ -8,13 +8,16 @@ import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
 
-object WithConfiguration {
+object Main {
     @JvmStatic
     fun main(args: Array<String>): Unit = runBlocking {
-        val qq: Long = System.getenv("QQ")?.toLongOrNull() ?: error("Environment variable QQ is not set")
-        val qqPsw: String = System.getenv("PSW") ?: error("Environment variable QQ PASSWORD is not set")
-        val admin: Long = System.getenv("ADMIN")?.toLongOrNull() ?: error("Environment variable Admin is not set")
-        val proxy: String = System.getenv("PROXY") ?: ""
+        val qq: Long = System.getenv("QQ")?.toLongOrNull() ?: System.getProperty("QQ")?.toLongOrNull()
+        ?: error("Environment variable QQ is not set")
+        val qqPsw: String =
+            System.getenv("PSW") ?: System.getProperty("PSW") ?: error("Environment variable QQ PASSWORD is not set")
+        val admin: Long = System.getenv("ADMIN")?.toLongOrNull() ?: System.getProperty("ADMIN")?.toLongOrNull()
+        ?: error("Environment variable Admin is not set")
+        val proxy: String = System.getenv("PROXY") ?: System.getProperty("PROXY") ?: ""
         val proxyList: List<String> = proxy.split(',')
         // 使用自定义配置
         val bot = BotFactory.newBot(qq, qqPsw) {
