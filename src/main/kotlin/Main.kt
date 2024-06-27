@@ -26,9 +26,6 @@ object WithConfiguration {
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             if (sender.id == admin || proxyList.contains(sender.id.toString())) {
                 if (message.content.startsWith("ag授权")) {
-                    if (message.content == "ag授权") {
-                        subject.sendMessage(message.quote() + "使用命令[ag授权 [脚本/ai/自动识别] [机器码] [yyyy-MM-dd/永久] [绑定qq号]]进行授权")
-                    }
                     val msgSplit: List<String> = message.content.split(" ")
                     if (msgSplit[0].trim() == "ag授权" && msgSplit.size == 5) {
                         val responseMsg =

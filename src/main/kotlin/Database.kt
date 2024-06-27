@@ -51,8 +51,8 @@ fun queryExpirationTime(type: String, condition: String): String {
     val strBuild: StringBuilder = StringBuilder()
     for (agMachine in testMachine) {
         strBuild.append("[授权类型：${agMachine.validateType}，")
-            .append("授权时效：${if (agMachine.expirationTime != null) agMachine.expirationTime else "永久授权"}]")
-            .append("\n")
+            .append("授权时效：${if (agMachine.expirationTime != null) agMachine.expirationTime else "永久授权"}，")
+            .append("机器码：${agMachine.machineCode}]").append("\n")
     }
     return strBuild.toString()
 }
@@ -68,15 +68,15 @@ fun addAuth(typeString: String, machine: String, expirationStr: String, qqString
     val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd") // 定义日期格式
     var localDate: LocalDate? = null
     try {
-        localDate = LocalDate.parse(expirationStr, dateFormat)
+        if (expirationStr != "永久") {
+            localDate = LocalDate.parse(expirationStr, dateFormat)
+        }
     } catch (e: DateTimeParseException) {
         return "Error parsing date: ${e.message}"
     }
 
-    val agMachines: List<AgMachine> = database.agMachines
-        .filter { it.machine_code eq machine }
-        .filter { it.validate_type eq type }
-        .toList()
+    val agMachines: List<AgMachine> =
+        database.agMachines.filter { it.machine_code eq machine }.filter { it.validate_type eq type }.toList()
     if (agMachines.isNotEmpty()) {
         for ((index, agMachine) in agMachines.withIndex()) {
             if (index == 0) {
