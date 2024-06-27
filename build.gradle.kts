@@ -22,6 +22,7 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.6.0")
     implementation("com.jayway.jsonpath:json-path:2.6.0")
     implementation("org.ktorm:ktorm-core:4.0.0")
+    runtimeOnly("mysql:mysql-connector-java:8.0.28")
 }
 
 tasks.test {
