@@ -24,7 +24,7 @@ object Main {
             fileBasedDeviceInfo() // 使用 device.json 存储设备信息
             protocol = BotConfiguration.MiraiProtocol.IPAD // 切换协议
         }.alsoLogin()
-        serverStart(bot)
+        KtorServer.serverStart(bot)
         bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             if (sender.id == admin || proxyList.contains(sender.id.toString())) {
@@ -38,7 +38,7 @@ object Main {
                         subject.sendMessage(message.quote() + "使用命令[ag授权 [脚本/ai/自动识别] [机器码] [yyyy-MM-dd/永久] [绑定qq号]]进行授权")
                     }
                 } else {
-                    val responseMsg = aiMsg(sender.id.toString(), message.content)
+                    val responseMsg = OpenAi.aiMsg(sender.id.toString(), message.content)
                     subject.sendMessage(message.quote() + responseMsg)
                 }
             }
@@ -46,7 +46,7 @@ object Main {
         bot.eventChannel.subscribeAlways<GroupMessageEvent> {
             val content = message[1]
             if (content is At && content.target == qq) {
-                val responseMsg = aiMsg(sender.id.toString(), message[2].content)
+                val responseMsg = OpenAi.aiMsg(sender.id.toString(), message[2].content)
                 if (responseMsg.isNotEmpty()) {
                     subject.sendMessage(message.quote() + responseMsg)
                 }
