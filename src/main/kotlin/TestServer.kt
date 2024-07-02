@@ -14,7 +14,7 @@ import net.mamoe.mirai.contact.isAdministrator
 data class GroupMember(val id: Long, val name: String, val isAdmin: Boolean)
 
 fun serverStart(bot: Bot) {
-    val server = embeddedServer(Netty, port = 8080) {
+    val server = embeddedServer(Netty, port = 14567) {
         install(ContentNegotiation) {
             json()
         }
