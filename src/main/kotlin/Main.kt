@@ -24,7 +24,7 @@ object Main {
             fileBasedDeviceInfo() // 使用 device.json 存储设备信息
             protocol = BotConfiguration.MiraiProtocol.IPAD // 切换协议
         }.alsoLogin()
-
+        serverStart(bot)
         bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             if (sender.id == admin || proxyList.contains(sender.id.toString())) {
