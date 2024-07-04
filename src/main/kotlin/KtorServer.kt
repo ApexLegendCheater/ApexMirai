@@ -54,14 +54,14 @@ object KtorServer {
                             mapOf(
                                 "machine_code" to machineCode,
                                 "validateType" to validateType,
-                                "validate" to validate(machineCode, validateType)
+                                "validate" to (validate(machineCode, validateType) != null)
                             )
                         )
                     }
                 }
             }
         }
-        server.start(wait = true)
+        server.start(wait = false)
     }
 }
 

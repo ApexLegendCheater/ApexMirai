@@ -1,6 +1,7 @@
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
+import net.mamoe.mirai.contact.isAdministrator
 import net.mamoe.mirai.event.events.FriendMessageEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.At
@@ -25,23 +26,17 @@ object Main {
             protocol = BotConfiguration.MiraiProtocol.IPAD // 切换协议
         }.alsoLogin()
         KtorServer.serverStart(bot)
+        bot.getGroup(206666037L)?.members?.forEach {
+            GroupMemberCache.addMemberToGroup(
+                it.group.id, GroupMember(
+                    it.id, it.nameCard, it.isAdministrator()
+                )
+            )
+        }
         bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
-            if (sender.id == admin || proxyList.contains(sender.id.toString())) {
-                if (message.content.startsWith("ag授权")) {
-                    val msgSplit: List<String> = message.content.split(" ")
-                    if (msgSplit[0].trim() == "ag授权" && msgSplit.size == 5) {
-                        val responseMsg =
-                            addAuth(msgSplit[1].trim(), msgSplit[2].trim(), msgSplit[3].trim(), msgSplit[4].trim())
-                        subject.sendMessage(message.quote() + responseMsg)
-                    } else {
-                        subject.sendMessage(message.quote() + "使用命令[ag授权 [脚本/ai/自动识别] [机器码] [yyyy-MM-dd/永久] [绑定qq号]]进行授权")
-                    }
-                } else {
-                    val responseMsg = OpenAi.aiMsg(sender.id.toString(), message.content)
-                    subject.sendMessage(message.quote() + responseMsg)
-                }
-            }
+            val responseMsg = OpenAi.aiMsg(sender.id.toString(), message.content)
+            subject.sendMessage(message.quote() + responseMsg)
         }
         bot.eventChannel.subscribeAlways<GroupMessageEvent> {
             val content = message[1]
@@ -52,12 +47,19 @@ object Main {
                 }
             } else if (content is At && message.size == 3) {
                 if (message[2].toString().trim() == "查询ag授权") {
-                    subject.sendMessage(message.quote() + queryExpirationTime("qq", content.target.toString()))
+                    subject.sendMessage(message.quote() + getAuthStr("qq", content.target.toString()))
                 }
             } else {
-                val messageSplit: List<String> = message.content.split(" ")
-                if (messageSplit.size == 2 && messageSplit[0].trim() == "查询ag授权") {
-                    subject.sendMessage(message.quote() + queryExpirationTime("machine_code", messageSplit[1]))
+                val regex = "获取(.*)体验卡".toRegex()
+                val match = regex.find(message.content)
+                if (match != null) {
+                    val validateTypeStr = match.groupValues[1]
+                    subject.sendMessage(
+                        message.quote() + createExperienceCardByQQ(
+                            sender.id.toString(),
+                            validateTypeStr
+                        )
+                    )
                 }
             }
         }
