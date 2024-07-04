@@ -2,6 +2,7 @@ val ktorVersion = "2.3.11"
 val logbackVersion = "1.4.12"
 plugins {
     kotlin("jvm") version "1.9.23"
+    id("io.ktor.plugin") version "2.3.11"
     kotlin("plugin.serialization") version "1.8.0"
 }
 
@@ -19,22 +20,21 @@ dependencies {
     api("net.mamoe:mirai-core-api")     // 编译代码使用
     runtimeOnly("net.mamoe:mirai-core") // 运行时使用
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.jayway.jsonpath:json-path:2.6.0")
+    implementation("com.jayway.jsonpath:json-path:2.9.0")
     implementation("org.ktorm:ktorm-core:4.0.0")
     runtimeOnly("mysql:mysql-connector-java:8.0.28")
 
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-client-core")
+    implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("io.ktor:ktor-serialization-gson")
+    implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.ktor:ktor-serialization-jackson")
+    implementation("io.ktor:ktor-server-status-pages")
+    implementation("io.ktor:ktor-server-core")
+    implementation("io.ktor:ktor-server-netty")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
+    implementation("io.ktor:ktor-server-config-yaml")
 }
 
 tasks.test {
