@@ -1,6 +1,6 @@
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-fun calculateNewExpirationTime(type: Int, currentExpirationTime: LocalDate): LocalDate? {
+fun calculateNewExpirationTime(type: Int, currentExpirationTime: LocalDateTime): LocalDateTime? {
     return when (type) {
         0 -> null   // 体验卡
         1 -> currentExpirationTime.plusDays(1)   // 天卡

@@ -1,21 +1,43 @@
-import io.ktor.client.engine.*
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.serializer
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.isAdministrator
-import io.ktor.serialization.jackson.*
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object KtorServer {
     @JvmStatic
     fun serverStart(bot: Bot?) {
         val server = embeddedServer(Netty, port = 14567) {
             install(ContentNegotiation) {
-                jackson()
+                jackson {
+                    // 注册 Kotlin 模块
+                    registerKotlinModule()
+                    // 注册 Java Time 模块
+                    registerModule(JavaTimeModule())
+                    // 禁用将日期写成时间戳
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    // 创建并注册自定义模块
+                    val customModule = SimpleModule().apply {
+                        addSerializer(LocalDateTime::class.java, CustomLocalDateTimeSerializer())
+                        addDeserializer(LocalDateTime::class.java, CustomLocalDateTimeDeserializer())
+                    }
+                    registerModule(customModule)
+                }
             }
             routing {
                 get("/") {
@@ -25,7 +47,7 @@ object KtorServer {
                     val groupId: Long = call.request.queryParameters["groupId"].toString().toLong()
                     val memberList: List<GroupMember>? = bot?.getGroup(groupId)?.members?.map {
                         GroupMember(
-                            it.id, it.nameCard, it.isAdministrator()
+                            it.id, it.nameCard, it.nick, it.isAdministrator()
                         )
                     }
                     call.respond(memberList ?: emptyList())
@@ -40,7 +62,12 @@ object KtorServer {
                 get("/machineBindKeys") {
                     val keys: String = call.request.queryParameters["key"].toString()
                     val machine: String = call.request.queryParameters["machineCode"].toString()
-                    call.respondText { bind(machine, keys) }
+                    val bind: String = bind(machine, keys)
+                    if (bind.startsWith("绑定成功")) {
+                        call.respondText { bind }
+                    } else {
+                        call.respondText(status = HttpStatusCode.fromValue(500), provider = { bind })
+                    }
                 }
                 // 校验机器码类型key是否过期
                 get("/validate") {
@@ -50,11 +77,13 @@ object KtorServer {
                         call.respond(HttpStatusCode(400, "机器码未提供"), result)
                     } else {
                         val validateType: String = call.request.queryParameters["validateType"].toString()
+                        val validate: AgMachinesKeys? = validate(machineCode, validateType)
                         call.respond(
                             mapOf(
                                 "machine_code" to machineCode,
-                                "validateType" to validateType,
-                                "validate" to (validate(machineCode, validateType) != null)
+                                "validate_type" to validateType,
+                                "access_granted" to (validate != null),
+                                "expiration_time" to validate?.expirationTime
                             )
                         )
                     }

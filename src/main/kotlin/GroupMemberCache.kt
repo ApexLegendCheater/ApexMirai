@@ -16,8 +16,8 @@ object GroupMemberCache {
     }
 
     // 从指定群组中移除成员
-    fun removeMemberFromGroup(groupId: Long, member: GroupMember) {
-        groupCache[groupId]?.remove(member.id)
+    fun removeMemberFromGroup(groupId: Long, memberId: Long) {
+        groupCache[groupId]?.remove(memberId)
     }
 
     // 移除整个群组

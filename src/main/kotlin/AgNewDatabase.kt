@@ -2,6 +2,7 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 val Database.agMachinesNew get() = this.sequenceOf(AgMachinesNew)
@@ -10,8 +11,23 @@ val Database.agKeys get() = this.sequenceOf(AgKeys)
 val agMachines = AgMachinesNew.aliased("machines")
 val agKeys = AgKeys.aliased("agKeys")
 
+val validateTypeMap = mapOf(
+    "自动识别" to "apex_recoils",
+    "ai" to "ai",
+    "升级脚本" to "auto_upgrade_script",
+)
+
 // 返回体验卡，判断是否有绑定卡，卡是否过期。若原卡存在，则返回原卡。不存在则新增卡
-fun createExperienceCardByQQ(qqStr: String, validateTypeStr: String): String {
+fun createExperienceCardByQQ(qqStr: String, validateTypeStrOri: String): String {
+    if (!validateTypeMap.keys.contains(validateTypeStrOri)) {
+        val keysAsString = validateTypeMap.keys.joinToString(
+            prefix = "[",
+            postfix = "]",
+            separator = ","
+        )
+        return "只支持申请:$keysAsString"
+    }
+    val validateTypeStr = validateTypeMap[validateTypeStrOri]!!
     val experienceKey: AgKey? =
         database.agKeys.find { (it.qq eq qqStr) and (it.validate_type eq validateTypeStr) and (it.key_type eq 0) }
 
@@ -55,7 +71,7 @@ fun validate(machine: String, validateTypeStr: String): AgMachinesKeys? {
 }
 
 fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
-    val currentTime = LocalDate.now()
+    val currentTime = LocalDateTime.now()
     val conditionOn = if (type == "qq") {
         agKeys.qq eq condition
     } else {
@@ -72,7 +88,7 @@ fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
         agKeys.key_type
     ).where {
         conditionOn and
-                ((agKeys.key_type inList mutableListOf(0, 5)) or (agKeys.expiration_time gte currentTime))
+                ((agKeys.key_type eq 5) or (agKeys.expiration_time gte currentTime) or agKeys.expiration_time.isNull())
     }.map { rowSet ->
         AgMachinesKeys(
             rowSet[agMachines.id],
@@ -128,7 +144,7 @@ fun bind(machine: String, keys: String): String {
         agMachineNew.flushChanges()
     }
     agKey.used = 1
-    agKey.expirationTime = calculateNewExpirationTime(agKey.keyType, LocalDate.now())
+    agKey.expirationTime = calculateNewExpirationTime(agKey.keyType, LocalDateTime.now())
     agKey.flushChanges()
-    return "绑定成功，有效期到${agKey.expirationTime}"
+    return "绑定成功，有效期到${agKey.expirationTime ?: "永久"}"
 }

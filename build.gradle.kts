@@ -23,6 +23,8 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.9.0")
     implementation("org.ktorm:ktorm-core:4.0.0")
     runtimeOnly("mysql:mysql-connector-java:8.0.28")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
 
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")

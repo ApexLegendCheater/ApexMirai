@@ -1,9 +1,12 @@
 import kotlinx.coroutines.runBlocking
+import net.mamoe.mirai.Bot
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.contact.isAdministrator
 import net.mamoe.mirai.event.events.FriendMessageEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.event.events.MemberJoinEvent
+import net.mamoe.mirai.event.events.MemberLeaveEvent
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.content
@@ -20,19 +23,19 @@ object Main {
         ?: error("Environment variable Admin is not set")
         val proxy: String = System.getenv("PROXY") ?: System.getProperty("PROXY") ?: ""
         val proxyList: List<String> = proxy.split(',')
+        val checkGroup: String = System.getenv("CHECK_GROUP") ?: System.getProperty("CHECK_GROUP") ?: ""
+        val checkGroupList: List<String> = checkGroup.split(',')
         // 使用自定义配置
         val bot = BotFactory.newBot(qq, qqPsw) {
             fileBasedDeviceInfo() // 使用 device.json 存储设备信息
             protocol = BotConfiguration.MiraiProtocol.IPAD // 切换协议
         }.alsoLogin()
-        KtorServer.serverStart(bot)
-        bot.getGroup(206666037L)?.members?.forEach {
-            GroupMemberCache.addMemberToGroup(
-                it.group.id, GroupMember(
-                    it.id, it.nameCard, it.isAdministrator()
-                )
-            )
+        bot.groups.map {
+            if (checkGroupList.contains(it.id.toString())) {
+                flushGroupMember(bot, it.id)
+            }
         }
+        KtorServer.serverStart(bot)
         bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             val responseMsg = OpenAi.aiMsg(sender.id.toString(), message.content)
@@ -40,7 +43,9 @@ object Main {
         }
         bot.eventChannel.subscribeAlways<GroupMessageEvent> {
             val content = message[1]
-            if (content is At && content.target == qq) {
+            if (message.content == "查询ag授权") {
+                subject.sendMessage(message.quote() + getAuthStr("qq", sender.id.toString()))
+            } else if (content is At && content.target == qq) {
                 val responseMsg = OpenAi.aiMsg(sender.id.toString(), message[2].content)
                 if (responseMsg.isNotEmpty()) {
                     subject.sendMessage(message.quote() + responseMsg)
@@ -49,6 +54,10 @@ object Main {
                 if (message[2].toString().trim() == "查询ag授权") {
                     subject.sendMessage(message.quote() + getAuthStr("qq", content.target.toString()))
                 }
+            } else if (message.content == "/帮助" || message.content == "/help" || message.content == "/h") {
+                subject.sendMessage(
+                    message.quote() + "可用命令：\n1、查询ag授权\n" + "2、获取[ai/自动识别/升级脚本]体验卡"
+                )
             } else {
                 val regex = "获取(.*)体验卡".toRegex()
                 val match = regex.find(message.content)
@@ -62,6 +71,37 @@ object Main {
                     )
                 }
             }
+        }
+        bot.eventChannel.subscribeAlways<MemberJoinEvent> {
+            if (checkGroupList.contains(groupId.toString())) {
+                println("${member.id}加入群${groupId}")
+                GroupMemberCache.addMemberToGroup(
+                    groupId, GroupMember(
+                        member.id,
+                        member.nameCard,
+                        member.nick,
+                        member.isAdministrator()
+                    )
+                )
+            }
+
+        }
+        bot.eventChannel.subscribeAlways<MemberLeaveEvent> {
+            if (checkGroupList.contains(groupId.toString())) {
+                println("${member.id}离开群${groupId}")
+                GroupMemberCache.removeMemberFromGroup(groupId, member.id)
+            }
+        }
+    }
+
+    private fun flushGroupMember(bot: Bot, groupId: Long) {
+        println("刷新群${groupId}成员缓存")
+        bot.getGroup(groupId)?.members?.forEach {
+            GroupMemberCache.addMemberToGroup(
+                it.group.id, GroupMember(
+                    it.id, it.nameCard, it.nick, it.isAdministrator()
+                )
+            )
         }
     }
 }

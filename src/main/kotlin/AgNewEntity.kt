@@ -1,9 +1,7 @@
 import org.ktorm.entity.Entity
-import org.ktorm.schema.Table
-import org.ktorm.schema.date
-import org.ktorm.schema.int
-import org.ktorm.schema.varchar
+import org.ktorm.schema.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface AgKey : Entity<AgKey> {
     companion object : Entity.Factory<AgKey>()
@@ -11,7 +9,7 @@ interface AgKey : Entity<AgKey> {
     val id: Int
     var valKey: String
     var qq: String
-    var expirationTime: LocalDate?
+    var expirationTime: LocalDateTime?
     var validateType: String
     var used: Int
     var keyType: Int
@@ -24,7 +22,7 @@ open class AgKeys(alias: String?) : Table<AgKey>("ag_keys", alias) {
     val id = int("id").primaryKey().bindTo { it.id }
     var val_key = varchar("val_key").bindTo { it.valKey }
     var qq = varchar("qq").bindTo { it.qq }
-    var expiration_time = date("expiration_time").bindTo { it.expirationTime }
+    var expiration_time = datetime("expiration_time").bindTo { it.expirationTime }
     var validate_type = varchar("validate_type").bindTo { it.validateType }
     var used = int("used").bindTo { it.used }
     var key_type = int("key_type").bindTo { it.keyType }
@@ -53,7 +51,7 @@ data class AgMachinesKeys(
     var valKey: String?,
     var machineCode: String?,
     var qq: String?,
-    var expirationTime: LocalDate?,
+    var expirationTime: LocalDateTime?,
     var validateType: String?,
     var used: Int?,
     var keyType: Int?
