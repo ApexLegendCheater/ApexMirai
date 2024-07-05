@@ -72,9 +72,9 @@ fun createKeys(cardType: String, validateTypeStr: String, qqStr: String): String
         valKey = uuid
         qq = qqStr
         expirationTime = null
-        validateType = validateTypeStr
+        validateType = cardType
         used = 0
-        keyType = keyTypeMap[cardType] ?: 1
+        keyType = keyTypeMap[validateTypeStr] ?: 1
     })
     return uuid
 }
@@ -84,7 +84,7 @@ fun validate(machine: String, validateTypeStr: String): AgMachinesKeys? {
     println(authList)
     if (authList.size == 1) {
         val agMachinesKeys = authList[0]
-        if (GroupMemberCache.memberInAnyGroup(agMachinesKeys.qq!!.toLong())) {
+        if (agMachinesKeys.externalCard == 1 || GroupMemberCache.memberInAnyGroup(agMachinesKeys.qq!!.toLong())) {
             // 控制请求频率。请求过则拒绝，默认频率最快为45秒一次
             if (agMachinesKeys.lastValTime == null || LocalDateTime.now()
                     .isAfter(agMachinesKeys.lastValTime!!.plusSeconds(45))
@@ -118,7 +118,8 @@ fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
         agKeys.validate_type,
         agKeys.used,
         agKeys.key_type,
-        agKeys.last_val_time
+        agKeys.last_val_time,
+        agKeys.external_card
     ).where {
         conditionOn and
                 ((agKeys.key_type eq 5) or (agKeys.expiration_time gte currentTime) or agKeys.expiration_time.isNull())
@@ -133,6 +134,7 @@ fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
             rowSet[agKeys.used],
             rowSet[agKeys.key_type],
             rowSet[agKeys.last_val_time],
+            rowSet[agKeys.external_card]!!,
         )
     }
 }
@@ -167,7 +169,8 @@ fun bind(machine: String, keys: String): String {
         }
     }
 
-    val agMachineNew = database.agMachinesNew.find { AgMachinesNew.machine_code eq machine }
+    val agMachineNew =
+        database.agMachinesNew.find { (AgMachinesNew.machine_code eq machine) and AgMachinesNew.val_key.isNull() }
     if (agMachineNew == null) {
         database.agMachinesNew.add(AgMachineNew {
             valKey = keys

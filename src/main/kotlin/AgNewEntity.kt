@@ -13,6 +13,7 @@ interface AgKey : Entity<AgKey> {
     var used: Int
     var keyType: Int
     var lastValTime: LocalDateTime?
+    var externalCard: Int
 }
 
 open class AgKeys(alias: String?) : Table<AgKey>("ag_keys", alias) {
@@ -27,6 +28,7 @@ open class AgKeys(alias: String?) : Table<AgKey>("ag_keys", alias) {
     var used = int("used").bindTo { it.used }
     var key_type = int("key_type").bindTo { it.keyType }
     var last_val_time = datetime("last_val_time").bindTo { it.lastValTime }
+    var external_card = int("external_card").bindTo { it.externalCard }
 }
 
 interface AgMachineNew : Entity<AgMachineNew> {
@@ -56,5 +58,6 @@ data class AgMachinesKeys(
     var validateType: String?,
     var used: Int?,
     var keyType: Int?,
-    var lastValTime: LocalDateTime?
+    var lastValTime: LocalDateTime?,
+    var externalCard: Int
 )

@@ -62,7 +62,9 @@ object Main {
                     if (sender.isOwner() || sender.isAdministrator()) {
                         val (cardType, duration) = match.destructured
                         val key: String = createKeys(cardType, duration, content.target.toString())
-                        sender.sendMessage("授权[${content.target}]的[$cardType][$duration]卡:[$key]")
+                        sender.sendMessage("授权给[${content.target}]的[${cardType}${duration}卡]，卡密为:[${key}]")
+                        group.getMember(content.target)!!
+                            .sendMessage("[${sender.id}]授权给你的[${cardType}${duration}卡]，卡密为:[${key}]")
                         subject.sendMessage(message.quote() + "卡密已私聊，请查收后妥善保管。")
                     } else {
                         subject.sendMessage(message.quote() + "违规操作！只有管理员有权授权！")
