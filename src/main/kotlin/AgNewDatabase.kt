@@ -1,7 +1,8 @@
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
-import org.ktorm.entity.*
-import java.time.LocalDate
+import org.ktorm.entity.add
+import org.ktorm.entity.find
+import org.ktorm.entity.sequenceOf
 import java.time.LocalDateTime
 import java.util.*
 

@@ -1,6 +1,8 @@
 import org.ktorm.entity.Entity
-import org.ktorm.schema.*
-import java.time.LocalDate
+import org.ktorm.schema.Table
+import org.ktorm.schema.datetime
+import org.ktorm.schema.int
+import org.ktorm.schema.varchar
 import java.time.LocalDateTime
 
 interface AgKey : Entity<AgKey> {
