@@ -1,8 +1,5 @@
 import org.ktorm.entity.Entity
-import org.ktorm.schema.Table
-import org.ktorm.schema.datetime
-import org.ktorm.schema.int
-import org.ktorm.schema.varchar
+import org.ktorm.schema.*
 import java.time.LocalDateTime
 
 interface AgKey : Entity<AgKey> {
@@ -15,6 +12,7 @@ interface AgKey : Entity<AgKey> {
     var validateType: String
     var used: Int
     var keyType: Int
+    var lastValTime: LocalDateTime?
 }
 
 open class AgKeys(alias: String?) : Table<AgKey>("ag_keys", alias) {
@@ -28,6 +26,7 @@ open class AgKeys(alias: String?) : Table<AgKey>("ag_keys", alias) {
     var validate_type = varchar("validate_type").bindTo { it.validateType }
     var used = int("used").bindTo { it.used }
     var key_type = int("key_type").bindTo { it.keyType }
+    var last_val_time = datetime("last_val_time").bindTo { it.lastValTime }
 }
 
 interface AgMachineNew : Entity<AgMachineNew> {
@@ -56,5 +55,6 @@ data class AgMachinesKeys(
     var expirationTime: LocalDateTime?,
     var validateType: String?,
     var used: Int?,
-    var keyType: Int?
+    var keyType: Int?,
+    var lastValTime: LocalDateTime?
 )

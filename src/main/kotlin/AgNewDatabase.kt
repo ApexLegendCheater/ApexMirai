@@ -3,6 +3,7 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.add
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
+import org.ktorm.entity.update
 import java.time.LocalDateTime
 import java.util.*
 
@@ -65,7 +66,18 @@ fun validate(machine: String, validateTypeStr: String): AgMachinesKeys? {
     if (authList.size == 1) {
         val agMachinesKeys = authList[0]
         if (GroupMemberCache.memberInAnyGroup(agMachinesKeys.qq!!.toLong())) {
-            return authList[0]
+            // 控制请求频率。请求过则拒绝，默认频率最快为45秒一次
+            if (agMachinesKeys.lastValTime == null || LocalDateTime.now()
+                    .isAfter(agMachinesKeys.lastValTime!!.plusSeconds(45))
+            ) {
+                database.update(AgKeys) {
+                    set(it.last_val_time, LocalDateTime.now())
+                    where {
+                        it.val_key eq agMachinesKeys.valKey!!
+                    }
+                }
+                return authList[0]
+            }
         }
     }
     return null
@@ -86,7 +98,8 @@ fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
         agKeys.expiration_time,
         agKeys.validate_type,
         agKeys.used,
-        agKeys.key_type
+        agKeys.key_type,
+        agKeys.last_val_time
     ).where {
         conditionOn and
                 ((agKeys.key_type eq 5) or (agKeys.expiration_time gte currentTime) or agKeys.expiration_time.isNull())
@@ -100,6 +113,7 @@ fun getAuthList(type: String, condition: String): List<AgMachinesKeys> {
             rowSet[agKeys.validate_type],
             rowSet[agKeys.used],
             rowSet[agKeys.key_type],
+            rowSet[agKeys.last_val_time],
         )
     }
 }
