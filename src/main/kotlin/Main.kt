@@ -2,7 +2,9 @@ import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
+import net.mamoe.mirai.contact.getMember
 import net.mamoe.mirai.contact.isAdministrator
+import net.mamoe.mirai.contact.isOwner
 import net.mamoe.mirai.event.events.FriendMessageEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.events.MemberJoinEvent
@@ -51,16 +53,27 @@ object Main {
                     subject.sendMessage(message.quote() + responseMsg)
                 }
             } else if (content is At && message.size == 3) {
-                if (message[2].toString().trim() == "查询ag授权") {
+                val msg: String = message[2].toString().trim()
+                if (msg == "查询ag授权") {
                     subject.sendMessage(message.quote() + getAuthStr("qq", content.target.toString()))
+                }
+                val match = "授权(ai|自动识别|升级脚本)(天|月|周|年|永久)卡".toRegex().find(msg)
+                if (match != null) {
+                    if (sender.isOwner() || sender.isAdministrator()) {
+                        val (cardType, duration) = match.destructured
+                        val key: String = createKeys(cardType, duration, content.target.toString())
+                        sender.sendMessage("授权[${content.target}]的[$cardType][$duration]卡:[$key]")
+                        subject.sendMessage(message.quote() + "卡密已私聊，请查收后妥善保管。")
+                    } else {
+                        subject.sendMessage(message.quote() + "违规操作！只有管理员有权授权！")
+                    }
                 }
             } else if (message.content == "/帮助" || message.content == "/help" || message.content == "/h") {
                 subject.sendMessage(
                     message.quote() + "可用命令：\n1、查询ag授权\n" + "2、获取[ai/自动识别/升级脚本]体验卡"
                 )
             } else {
-                val regex = "获取(.*)体验卡".toRegex()
-                val match = regex.find(message.content)
+                val match = "获取(.*)体验卡".toRegex().find(message.content)
                 if (match != null) {
                     val validateTypeStr = match.groupValues[1]
                     subject.sendMessage(

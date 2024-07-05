@@ -3,7 +3,6 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.add
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
-import org.ktorm.entity.update
 import java.time.LocalDateTime
 import java.util.*
 
@@ -17,6 +16,13 @@ val validateTypeMap = mapOf(
     "自动识别" to "apex_recoils",
     "ai" to "ai",
     "升级脚本" to "auto_upgrade_script",
+)
+val keyTypeMap = mapOf(
+    "天" to 1,
+    "周" to 2,
+    "月" to 3,
+    "年" to 4,
+    "永久" to 5,
 )
 
 // 返回体验卡，判断是否有绑定卡，卡是否过期。若原卡存在，则返回原卡。不存在则新增卡
@@ -58,6 +64,19 @@ fun createExperienceCardByQQ(qqStr: String, validateTypeStrOri: String): String 
         })
         return uuid
     }
+}
+
+fun createKeys(cardType: String, validateTypeStr: String, qqStr: String): String {
+    val uuid: String = UUID.randomUUID().toString()
+    database.agKeys.add(AgKey {
+        valKey = uuid
+        qq = qqStr
+        expirationTime = null
+        validateType = validateTypeStr
+        used = 0
+        keyType = keyTypeMap[cardType] ?: 1
+    })
+    return uuid
 }
 
 fun validate(machine: String, validateTypeStr: String): AgMachinesKeys? {
