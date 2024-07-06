@@ -7,7 +7,7 @@ interface AgKey : Entity<AgKey> {
 
     val id: Int
     var valKey: String
-    var qq: String
+    var qq: String?
     var expirationTime: LocalDateTime?
     var validateType: String
     var used: Int

@@ -75,7 +75,7 @@ object Main {
                     message.quote() + "可用命令：\n1、查询ag授权\n" + "2、获取[ai/自动识别/升级脚本]体验卡"
                 )
             } else {
-                val match = "获取(.*)体验卡".toRegex().find(message.content)
+                var match = "获取(.*)体验卡".toRegex().find(message.content)
                 if (match != null) {
                     val validateTypeStr = match.groupValues[1]
                     val key: String = createExperienceCardByQQ(
@@ -84,6 +84,15 @@ object Main {
                     )
                     sender.sendMessage("获取${validateTypeStr}体验卡成功，卡密为：${key}")
                     subject.sendMessage(message.quote() + "体验卡卡密已私聊，请查收后妥善保管。")
+                }
+                match = "生成(\\d+)张(ai|自动识别|自动识别服务端|升级脚本)(天|月|周|年|永久)卡".toRegex()
+                    .find(message.content)
+                if (match != null) {
+                    val (quantity, cardType, duration) = match.destructured
+                    val keyList: List<String> = createKeysExt(quantity.toInt(), cardType, duration)
+                    val keyStr: String = keyList.joinToString(separator = "\n")
+                    subject.sendMessage(message.quote() + "生成${quantity}张${cardType}${duration}卡成功，已私聊，请查收后妥善保管。")
+                    sender.sendMessage("生成${quantity}张${cardType}${duration}卡成功，卡密：\n${keyStr}")
                 }
             }
         }

@@ -80,6 +80,23 @@ fun createKeys(cardType: String, validateTypeStr: String, qqStr: String): String
     return uuid
 }
 
+fun createKeysExt(createNumber: Int, cardType: String, validateTypeStr: String): List<String> {
+    val keyList: MutableList<String> = mutableListOf()
+    for (i in 0 until createNumber) {
+        val uuid: String = UUID.randomUUID().toString()
+        database.agKeys.add(AgKey {
+            valKey = uuid
+            validateType = validateTypeMap[cardType]!!
+            keyType = keyTypeMap[validateTypeStr] ?: 1
+            used = 0
+            externalCard = 1
+        })
+        keyList.add(uuid)
+    }
+    return keyList
+}
+
+
 fun validate(machine: String, validateTypeStr: String): AgMachinesKeys? {
     val authList: List<AgMachinesKeys> = getAuthList("machine", machine).filter { it.validateType == validateTypeStr }
     println(authList)
