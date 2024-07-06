@@ -1,15 +1,33 @@
 ### 项目介绍
 
-使用Mirai搭建的机器人demo，对接了openai api进行自动回复（只对ADMIN的私人消息回复）。
+使用Mirai搭建的qq机器人。
 
-### 环境变量
+主要功能：
 
-QQ=登录的QQ账号
+1. 私聊与群聊at机器人的open ai回复。
+2. 提供apex gun系列辅助的授权服务，可使用以下指令：
+   1. 查询ag授权：查询自己ag相关授权
+   2. @某人 查询ag授权：查询某人ag相关授权
+   3. 获取(ai|自动识别|自动识别服务端|升级脚本)体验卡：能获取一张对应功能的体验卡（私聊通知）
+   4. [仅管理员可用]@某人 授权(ai|自动识别|自动识别服务端|升级脚本)(天|月|周|年|永久)卡：管理员分发卡密（私聊通知）
+3. 提供授权认证接口
 
-PSW=登录的QQ密码
+### 启动参数
 
-ADMIN=管理员QQ
+-DADMIN=指定机器人拥有者qq号
 
-API_URL=对接的OPEN AI的BaseUrl
+-DAPI_KEY=open ai key
 
-API_KEY=OPENAI KEY
+-DAPI_URL=open ai base url
+
+-DJDBC_URL=数据库jdbc连接
+
+-DJDBC_USER=数据库用户
+
+-DJDBC_PSW=数据库密码
+
+-DQQ=登录账号
+
+-DPSW=登录密码
+
+-DPROXY=拥有管理员权限的其他qq，多个使用逗号切割

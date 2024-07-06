@@ -78,12 +78,12 @@ object Main {
                 val match = "获取(.*)体验卡".toRegex().find(message.content)
                 if (match != null) {
                     val validateTypeStr = match.groupValues[1]
-                    subject.sendMessage(
-                        message.quote() + createExperienceCardByQQ(
-                            sender.id.toString(),
-                            validateTypeStr
-                        )
+                    val key: String = createExperienceCardByQQ(
+                        sender.id.toString(),
+                        validateTypeStr
                     )
+                    sender.sendMessage("获取${validateTypeStr}体验卡成功，卡密为：${key}")
+                    subject.sendMessage(message.quote() + "体验卡卡密已私聊，请查收后妥善保管。")
                 }
             }
         }
