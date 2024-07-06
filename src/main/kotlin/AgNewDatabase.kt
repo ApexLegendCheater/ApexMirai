@@ -14,6 +14,7 @@ val agKeys = AgKeys.aliased("agKeys")
 
 val validateTypeMap = mapOf(
     "自动识别" to "apex_recoils",
+    "自动识别服务端" to "apex_recoils_server",
     "ai" to "ai",
     "升级脚本" to "auto_upgrade_script",
 )
@@ -72,7 +73,7 @@ fun createKeys(cardType: String, validateTypeStr: String, qqStr: String): String
         valKey = uuid
         qq = qqStr
         expirationTime = null
-        validateType = cardType
+        validateType = validateTypeMap[cardType]!!
         used = 0
         keyType = keyTypeMap[validateTypeStr] ?: 1
     })

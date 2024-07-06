@@ -57,7 +57,7 @@ object Main {
                 if (msg == "查询ag授权") {
                     subject.sendMessage(message.quote() + getAuthStr("qq", content.target.toString()))
                 }
-                val match = "授权(ai|自动识别|升级脚本)(天|月|周|年|永久)卡".toRegex().find(msg)
+                val match = "授权(ai|自动识别|自动识别服务端|升级脚本)(天|月|周|年|永久)卡".toRegex().find(msg)
                 if (match != null) {
                     if (sender.isOwner() || sender.isAdministrator()) {
                         val (cardType, duration) = match.destructured
