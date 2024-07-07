@@ -55,6 +55,30 @@ object KtorServer {
                     val validateType: String = call.request.queryParameters["validateType"].toString()
                     call.respondText { createExperienceCardByQQ(qq, validateType) }
                 }
+                get("/createKeyExt") {
+                    val createNumber: Int = call.request.queryParameters["createNumber"]!!.toInt()
+                    val keyType: String = call.request.queryParameters["keyType"].toString()
+                    val validateType: String = call.request.queryParameters["validateType"].toString()
+                    call.respondText {
+                        createKeysExt(
+                            createNumber,
+                            validateType,
+                            keyType
+                        ).joinToString(separator = "\n")
+                    }
+                }
+                get("/createKey") {
+                    val qq: String = call.request.queryParameters["qq"].toString()
+                    val keyType: String = call.request.queryParameters["keyType"].toString()
+                    val validateType: String = call.request.queryParameters["validateType"].toString()
+                    call.respondText {
+                        createKeys(
+                            keyType,
+                            validateType,
+                            qq
+                        )
+                    }
+                }
                 // key绑定机器码，同一类型未过期时，不能重复绑定
                 get("/machineBindKeys") {
                     val keys: String = call.request.queryParameters["key"].toString()
@@ -87,7 +111,7 @@ object KtorServer {
                 }
             }
         }
-        server.start(wait = false)
+        server.start(wait = true)
     }
 }
 

@@ -5,10 +5,7 @@ import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.contact.getMember
 import net.mamoe.mirai.contact.isAdministrator
 import net.mamoe.mirai.contact.isOwner
-import net.mamoe.mirai.event.events.FriendMessageEvent
-import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.mamoe.mirai.event.events.MemberJoinEvent
-import net.mamoe.mirai.event.events.MemberLeaveEvent
+import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.content
@@ -38,7 +35,7 @@ object Main {
             }
         }
         KtorServer.serverStart(bot)
-        bot.getFriend(admin)?.sendMessage("Hello, World!")
+//        bot.getFriend(admin)?.sendMessage("Hello, World!")
         bot.eventChannel.subscribeAlways<FriendMessageEvent> {
             val responseMsg = OpenAi.aiMsg(sender.id.toString(), message.content)
             subject.sendMessage(message.quote() + responseMsg)
@@ -115,6 +112,15 @@ object Main {
                 println("${member.id}离开群${groupId}")
                 GroupMemberCache.removeMemberFromGroup(groupId, member.id)
             }
+        }
+        bot.eventChannel.subscribeAlways<NewFriendRequestEvent> {
+            accept()
+            if (fromGroup != null) {
+                fromGroup!!.sendMessage("已添加[$fromId]为好友")
+            }
+        }
+        bot.eventChannel.subscribeAlways<BotInvitedJoinGroupRequestEvent> {
+            accept()
         }
     }
 
